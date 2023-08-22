@@ -1,5 +1,3 @@
-#Local tests are run with python -m unittest -v, and remote tests are run with udacity submit
-
 from utils import *
 
 board = cross(rows, cols)
@@ -11,6 +9,7 @@ unit_list = row_units + column_units + square_units + diagonal_units
 units = dict((s, [u for u in unit_list if s in u]) for s in boxes) 
 peers = dict((s, set(sum(units[s],[]))-set([s])) for s in boxes) 
 diagonal_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
+hard_grid = '.....6....59.....82....8....45........3........6..3.54...325..6..................'
 
 def grid_values(grid):
 
@@ -28,17 +27,6 @@ def grid_values(grid):
     return grid_dictionary
 
 
-def naked_twins(values):
-
-    for unit in unit_list:
-        for box in unit:
-            #print(f'The box is {box} and its value is {values[box]}\n')
-
-
-    raise NotImplementedError
-
-#naked_twins(grid_values(diagonal_grid))
-
 def eliminate(values):
     value_keys = values.keys()
     solved_values = [box for box in value_keys if len(values[box]) == 1] #Returns the boxes that have solved values based on the prompted grid
@@ -52,6 +40,7 @@ def eliminate(values):
 
     return values #Returns a grid that has only solved boxes and a smaller list of possible numbers for the unsolved boxes
 
+
 def only_choice(values):
 
     all_digits = '123456789'
@@ -64,6 +53,24 @@ def only_choice(values):
 
     return values
 
+
+def naked_twins(values): 
+
+    for unit in unit_list:
+        for box in unit:
+            # print(f'The box is {box} and its value is {values[box]}\n')
+            if len(values[box]) == 2: #We check for boxes with a pair of possibilities
+                twin_pair_box = values[box]
+                for peer_box in unit:
+                    twin_pair_peer_box = values[peer_box]
+                    if box != peer_box and twin_pair_box == twin_pair_peer_box: #We check if inside the units there are two distinct boxes with the same pair of twins
+                        for peers in unit: #Once identified the twin pair, we remove the pair of digits from the rest of peers
+                            if peers != box and peers != peer_box: #We go through the peers that are not the twin pairs
+                                digit = values[box]
+                                values = values[peers].replace(digit, '')
+                                
+    raise NotImplementedError
+
 def reduce_puzzle(values):
 
     # TODO: Modify it to complete this function
@@ -74,6 +81,7 @@ def reduce_puzzle(values):
         solved_values_before = len([box for box in values.keys() if len(values[box]) == 1]) #Checks how many boxes have a determined value, meaning they have been solved
         values = eliminate(values) #Use the Eliminate Strategy
         values = only_choice(values) #Use the Only Choice Strategy
+        values = naked_twins(values) #Use the Naked Twins Strategy
         solved_values_after = len([box for box in values.keys() if len(values[box]) == 1]) #Checks how many boxes have a determined value, to compare
         stalled = solved_values_before == solved_values_after  #If no new values were added, stop the loop. This means it cannot further reduce the sudoku grid through merely these two constraints
 
@@ -81,6 +89,7 @@ def reduce_puzzle(values):
             return False
         
     return values
+
 
 def search(values):
      
@@ -138,3 +147,7 @@ if __name__ == "__main__":
         pass
     except:
         print('We could not visualize your board due to a pygame issue. Not a problem! It is not a requirement.')
+
+display(only_choice(eliminate(grid_values(hard_grid))))
+#display(reduce_puzzle(only_choice(eliminate(grid_values(diagonal_grid)))))
+
