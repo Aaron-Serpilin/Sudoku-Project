@@ -67,13 +67,12 @@ def naked_twins(values):
                         for peers in unit: #Once identified the twin pair, we remove the pair of digits from the rest of peers
                             if peers != box and peers != peer_box: #We go through the peers that are not the twin pairs
                                 digit = values[box]
-                                values = values[peers].replace(digit, '')
+                                values = values[peers].replace(digit[0], '') 
+                                values = values[peers].replace(digit[1], '')
                                 
     raise NotImplementedError
 
 def reduce_puzzle(values):
-
-    # TODO: Modify it to complete this function
 
     stalled = False
     while not stalled:
@@ -92,9 +91,7 @@ def reduce_puzzle(values):
 
 
 def search(values):
-     
-    # TODO: Modify it to complete this function
-    
+      
     if values is False: #Sanity check for if it fails earlier. A false value would mean the grid is unsolvable
         return False 
     
@@ -114,20 +111,7 @@ def search(values):
 
 
 def solve(grid):
-    """Find the solution to a Sudoku puzzle using search and constraint propagation
 
-    Parameters
-    ----------
-    grid(string)
-        a string representing a sudoku grid.
-        
-        Ex. '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
-
-    Returns
-    -------
-    dict or False
-        The dictionary representation of the final sudoku grid or False if no solution exists.
-    """
     values = grid2values(grid)
     values = search(values)
     return values
