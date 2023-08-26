@@ -39,19 +39,41 @@ def only_choice(values):
 
 def naked_twins(values): 
 
-    initial_list_of_pairs = []
+    print(f'The values at the beginning are:\n')
+    display(values)
+    list_of_twin_pairs = []
 
-    for unit in unit_list: #We loop through the units, and then through each box looking for twin pairs
+    for unit in unit_list: #We loop through the units, and then through each box looking for twin pairs, storing them in the list with their values and locations
         for box in unit:
             box_value = values[box]
             if len(box_value) == 2:
-                pair = (box_value, box)
-                if pair not in initial_list_of_pairs: #We make a list of the twins and their locations, and then remove repeated twins
-                    initial_list_of_pairs.append((box_value, box)) 
+                first_twin = (box_value, box)
+                if first_twin not in list_of_twin_pairs: 
+                    for peer in unit:
+                        peer_value = values[peer]
+                        if peer != box and box_value == peer_value:
+                            second_twin = (peer_value, peer)
+                            list_of_twin_pairs.append(first_twin)
+                            list_of_twin_pairs.append(second_twin)
 
-    # for pair in initial_list_of_pairs:
+    for twin_pairs in list_of_twin_pairs:
+        twin_first_digit = twin_pairs[0][0]
+        twin_second_digit = twin_pairs[0][1]
+        twin_location = twin_pairs[1]
+        twin_peers = peers[twin_location]
+
+        for peer in twin_peers:
+            if values[peer] != twin_pairs[0]: #We check if the values of the boxes are not the same as the twins since otherwise we will be deleting the twins as well
+                values[peer] = values[peer].replace(twin_first_digit, '')
+                values[peer] = values[peer].replace(twin_second_digit, '')
+
+        #print(f'The peers of the {twin_location} twin is {twin_peers}\nThere are {len(twin_peers)} peers\n')
+
+    print(f'The values after the strategy is where the twins are B2 and F6:\n')
+    display(values)
+
+    # for pair in list_of_twin_pairs:
     #     print(f'The pairs are {pair}\n')
-            
    
     raise NotImplementedError
 
