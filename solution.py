@@ -4,28 +4,12 @@ board = cross(rows, cols)
 row_units = [cross(r, cols) for r in rows]
 column_units = [cross(rows, c) for c in cols]
 square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','456','789')]
-diagonal_units = [[rows[i] + cols[i] for i in range(9)]] + [[rows[i] + cols[::-1][i] for i in range(9)]]
+diagonal_units = [[rows[i] + cols[i] for i in range(9)]] + [[rows[j] + cols[::-1][j] for j in range(9)]]
 unit_list = row_units + column_units + square_units + diagonal_units
 units = dict((s, [u for u in unit_list if s in u]) for s in boxes) 
 peers = dict((s, set(sum(units[s],[]))-set([s])) for s in boxes) 
 diagonal_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
 hard_grid = '.....6....59.....82....8....45........3........6..3.54...325..6..................'
-
-def grid_values(grid):
-
-    values = []
-    all_digits = '123456789'
-
-    for value in grid:
-        if value == '.':
-            values.append(all_digits)
-        elif value in all_digits:
-            values.append(value)
-
-    assert len(values) == 81
-    grid_dictionary = dict(zip(boxes, values))
-    return grid_dictionary
-
 
 def eliminate(values):
     value_keys = values.keys()
@@ -53,23 +37,22 @@ def only_choice(values):
 
     return values
 
-
 def naked_twins(values): 
 
-    for unit in unit_list:
+    initial_list_of_pairs = []
+
+    for unit in unit_list: #We loop through the units, and then through each box looking for twin pairs
         for box in unit:
-            # print(f'The box is {box} and its value is {values[box]}\n')
-            if len(values[box]) == 2: #We check for boxes with a pair of possibilities
-                twin_pair_box = values[box]
-                for peer_box in unit:
-                    twin_pair_peer_box = values[peer_box]
-                    if box != peer_box and twin_pair_box == twin_pair_peer_box: #We check if inside the units there are two distinct boxes with the same pair of twins
-                        for peers in unit: #Once identified the twin pair, we remove the pair of digits from the rest of peers
-                            if peers != box and peers != peer_box: #We go through the peers that are not the twin pairs
-                                digit = values[box]
-                                values = values[peers].replace(digit[0], '') 
-                                values = values[peers].replace(digit[1], '')
-                                
+            box_value = values[box]
+            if len(box_value) == 2:
+                pair = (box_value, box)
+                if pair not in initial_list_of_pairs: #We make a list of the twins and their locations, and then remove repeated twins
+                    initial_list_of_pairs.append((box_value, box)) 
+
+    # for pair in initial_list_of_pairs:
+    #     print(f'The pairs are {pair}\n')
+            
+   
     raise NotImplementedError
 
 def reduce_puzzle(values):
@@ -92,6 +75,8 @@ def reduce_puzzle(values):
 
 def search(values):
       
+    values = reduce_puzzle(values)
+
     if values is False: #Sanity check for if it fails earlier. A false value would mean the grid is unsolvable
         return False 
     
@@ -107,7 +92,7 @@ def search(values):
         if attempt:
             return attempt
    
-    raise NotImplementedError
+    #raise NotImplementedError
 
 
 def solve(grid):
@@ -131,7 +116,3 @@ if __name__ == "__main__":
         pass
     except:
         print('We could not visualize your board due to a pygame issue. Not a problem! It is not a requirement.')
-
-display(only_choice(eliminate(grid_values(hard_grid))))
-#display(reduce_puzzle(only_choice(eliminate(grid_values(diagonal_grid)))))
-
